@@ -17,7 +17,7 @@ func main() {
 	app.Action = func(c *cli.Context) error {
 
 		// Create the updater
-		u, err := tempclock.NewUpdater()
+		u, err := masterpi.NewUpdater()
 		if err != nil {
 			return err
 		}
