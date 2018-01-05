@@ -1,0 +1,7 @@
+pkg: masterpi
+dest: .
+compression:
+  compress: false
+custom:
+  - files:
+    - fonts
