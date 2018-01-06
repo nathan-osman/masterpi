@@ -13,6 +13,7 @@ type Updater struct {
 }
 
 func (u *Updater) refresh(t time.Time) {
+	t = t.Local()
 	u.display.Clear()
 	u.display.DrawText(
 		fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second()),
