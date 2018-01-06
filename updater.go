@@ -22,14 +22,14 @@ func (u *Updater) refresh(t time.Time) {
 		32,
 	)
 	u.display.DrawText(
-		fmt.Sprintf("%.1f° C", u.monitor.Value("28-0416a4a2abff")),
+		fmt.Sprintf("%.1f° C", u.monitor.Value(SensorOutdoor)),
 		FontThin,
 		8,
 		64,
 		16,
 	)
 	u.display.DrawText(
-		fmt.Sprintf("%.1f° C", u.monitor.Value("28-0416a4a40cff")),
+		fmt.Sprintf("%.1f° C", u.monitor.Value(SensorIndoor)),
 		FontThin,
 		72,
 		64,

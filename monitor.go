@@ -8,6 +8,11 @@ import (
 	"github.com/yryz/ds18b20"
 )
 
+const (
+	SensorOutdoor = "28-0416a4a2abff"
+	SensorIndoor  = "28-0416a4a40cff"
+)
+
 type Monitor struct {
 	mutex       sync.Mutex
 	values      map[string]float64
@@ -37,9 +42,12 @@ func (m *Monitor) updateSensors() {
 }
 
 func (m *Monitor) run() {
+	defer m.log.Info("monitor shut down")
 	defer close(m.stoppedChan)
 	t := time.NewTicker(time.Minute)
 	defer t.Stop()
+	m.log.Info("monitor started")
+	m.updateSensors()
 	for {
 		select {
 		case <-t.C:

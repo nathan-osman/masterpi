@@ -14,6 +14,24 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "sprise"
 	app.Usage = "Temperature and clock display"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:   "influxdb-addr",
+			Value:  "http://localhost:8086",
+			EnvVar: "INFLUXDB_ADDR",
+			Usage:  "address of InfluxDB host",
+		},
+		cli.StringFlag{
+			Name:   "influxdb-username",
+			EnvVar: "INFLUXDB_USERNAME",
+			Usage:  "username for connecting to InfluxDB",
+		},
+		cli.StringFlag{
+			Name:   "influxdb-password",
+			EnvVar: "INFLUXDB_PASSWORD",
+			Usage:  "password for connecting to InfluxDB",
+		},
+	}
 	app.Action = func(c *cli.Context) error {
 
 		// Create the monitor
@@ -29,6 +47,18 @@ func main() {
 			return err
 		}
 		defer u.Close()
+
+		// Create the uploader
+		i, err := masterpi.NewUploader(
+			c.String("influxdb-addr"),
+			c.String("influxdb-username"),
+			c.String("influxdb-password"),
+			m,
+		)
+		if err != nil {
+			return err
+		}
+		defer i.Close()
 
 		// Wait for SIGINT or SIGTERM
 		sigChan := make(chan os.Signal)
