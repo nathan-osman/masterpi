@@ -16,8 +16,15 @@ func main() {
 	app.Usage = "Temperature and clock display"
 	app.Action = func(c *cli.Context) error {
 
+		// Create the monitor
+		m, err := masterpi.NewMonitor()
+		if err != nil {
+			return err
+		}
+		defer m.Close()
+
 		// Create the updater
-		u, err := masterpi.NewUpdater()
+		u, err := masterpi.NewUpdater(m)
 		if err != nil {
 			return err
 		}

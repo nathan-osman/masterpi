@@ -13,10 +13,32 @@ import (
 	"golang.org/x/image/math/fixed"
 )
 
+const (
+	FontRegular = "regular"
+	FontThin    = "thin"
+)
+
 type Display struct {
-	oled *monochromeoled.OLED
-	img  *image.Gray
-	font *truetype.Font
+	oled  *monochromeoled.OLED
+	img   *image.Gray
+	fonts map[string]*truetype.Font
+}
+
+func loadFont(name string) *truetype.Font {
+	r, err := FS.OpenFile(CTX, name, os.O_RDONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Close()
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		panic(err)
+	}
+	f, err := truetype.Parse(b)
+	if err != nil {
+		panic(err)
+	}
+	return f
 }
 
 func (d *Display) clearImage() {
@@ -34,22 +56,12 @@ func NewDisplay() (*Display, error) {
 	if err != nil {
 		return nil, err
 	}
-	r, err := FS.OpenFile(CTX, "fonts/cairo.ttf", os.O_RDONLY, 0)
-	if err != nil {
-		return nil, err
-	}
-	defer r.Close()
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	f, err := truetype.Parse(b)
-	if err != nil {
-		return nil, err
-	}
 	d := &Display{
 		oled: o,
-		font: f,
+		fonts: map[string]*truetype.Font{
+			FontRegular: loadFont("fonts/roboto-regular.ttf"),
+			FontThin:    loadFont("fonts/roboto-thin.ttf"),
+		},
 	}
 	d.clearImage()
 	return d, nil
@@ -59,11 +71,11 @@ func (d *Display) Clear() {
 	d.clearImage()
 }
 
-func (d *Display) DrawText(text string, x, y, pointSize int) error {
+func (d *Display) DrawText(text, fontName string, x, y, pointSize int) error {
 	dr := &font.Drawer{
 		Dst: d.img,
 		Src: image.White,
-		Face: truetype.NewFace(d.font, &truetype.Options{
+		Face: truetype.NewFace(d.fonts[fontName], &truetype.Options{
 			Size:    float64(pointSize),
 			Hinting: font.HintingNone,
 		}),
