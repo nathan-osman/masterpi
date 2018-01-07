@@ -51,8 +51,8 @@ func (u *Uploader) uploadValues() {
 }
 
 func (u *Uploader) run() {
-	defer u.log.Info("uploader shut down")
 	defer close(u.stoppedChan)
+	defer u.log.Info("uploader shut down")
 	t := time.NewTicker(5 * time.Minute)
 	defer t.Stop()
 	u.log.Info("uploader started")

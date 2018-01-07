@@ -42,8 +42,8 @@ func (m *Monitor) updateSensors() {
 }
 
 func (m *Monitor) run() {
-	defer m.log.Info("monitor shut down")
 	defer close(m.stoppedChan)
+	defer m.log.Info("monitor shut down")
 	t := time.NewTicker(time.Minute)
 	defer t.Stop()
 	m.log.Info("monitor started")
