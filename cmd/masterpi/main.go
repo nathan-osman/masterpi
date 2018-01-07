@@ -74,6 +74,13 @@ func main() {
 		}
 		defer s.Close()
 
+		// Create the HTTP server
+		h, err := masterpi.NewServer(r)
+		if err != nil {
+			return err
+		}
+		defer h.Close()
+
 		// Wait for SIGINT or SIGTERM
 		sigChan := make(chan os.Signal)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
