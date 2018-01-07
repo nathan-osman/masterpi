@@ -24,7 +24,7 @@ func (s *Server) writeResponse(w http.ResponseWriter, contentType string, conten
 }
 
 func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	s.writeResponse(w, "text/plain", []byte(`<!DOCTYPE html>
+	s.writeResponse(w, "text/html", []byte(`<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
