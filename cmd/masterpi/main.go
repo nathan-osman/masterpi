@@ -60,6 +60,13 @@ func main() {
 		}
 		defer i.Close()
 
+		// Create the relay controller
+		r, err := masterpi.NewRelay()
+		if err != nil {
+			return err
+		}
+		defer r.Close()
+
 		// Wait for SIGINT or SIGTERM
 		sigChan := make(chan os.Signal)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
