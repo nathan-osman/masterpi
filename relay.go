@@ -13,7 +13,7 @@ type Relay struct {
 }
 
 func NewRelay() (*Relay, error) {
-	p, err := rpi.OpenPin(17, rpi.IN)
+	p, err := rpi.OpenPin(17, rpi.OUT)
 	if err != nil {
 		return nil, err
 	}
