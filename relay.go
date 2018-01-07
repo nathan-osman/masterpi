@@ -12,12 +12,25 @@ type Relay struct {
 	on    bool
 }
 
+func initialValue() (rpi.Value, error) {
+	p, err := rpi.OpenPin(17, rpi.IN)
+	if err != nil {
+		return 0, err
+	}
+	defer p.Close()
+	v, err := p.Read()
+	if err != nil {
+		return 0, err
+	}
+	return v, nil
+}
+
 func NewRelay() (*Relay, error) {
-	p, err := rpi.OpenPin(17, rpi.OUT)
+	v, err := initialValue()
 	if err != nil {
 		return nil, err
 	}
-	v, err := p.Read()
+	p, err := rpi.OpenPin(17, rpi.OUT)
 	if err != nil {
 		return nil, err
 	}
