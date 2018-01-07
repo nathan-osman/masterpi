@@ -67,6 +67,13 @@ func main() {
 		}
 		defer r.Close()
 
+		// Create the switch monitor
+		s, err := masterpi.NewSwitch(r)
+		if err != nil {
+			return err
+		}
+		defer s.Close()
+
 		// Wait for SIGINT or SIGTERM
 		sigChan := make(chan os.Signal)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
