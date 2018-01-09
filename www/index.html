@@ -12,10 +12,17 @@
             <small>Raspberry Pi Controller</small>
         </h1>
 
-        <hr>
+        <div class="group lamp">
+            <div class="title">Lamp</div>
+            <div class="status">
+                Status:
+                <strong class="value">-</strong>
+            </div>
+            <button type="button" class="on">ON</button>
+            <button type="button" class="off">OFF</button>
+        </div>
 
-        <form method="post" action="/api/lamp/toggle">
-            <button type="submit">Toggle Lamp</button>
-        </form>
+        <script src="/js/jquery.min.js"></script>
+        <script src="/js/masterpi.js"></script>
     </body>
 </html>

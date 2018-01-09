@@ -46,6 +46,17 @@ func (r *Relay) IsOn() bool {
 	return r.on
 }
 
+func (r *Relay) SetOn(on bool) {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+	if on {
+		r.pin.Write(rpi.HIGH)
+	} else {
+		r.pin.Write(rpi.LOW)
+	}
+	r.on = on
+}
+
 func (r *Relay) Toggle() {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()

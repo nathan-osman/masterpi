@@ -5,6 +5,7 @@
 
 body {
     font-family: sans-serif;
+    margin: 16px;
 }
 
 button {
@@ -22,7 +23,7 @@ button:hover {
 h1 {
     font-size: 32pt;
     font-weight: normal;
-    margin: 0;
+    margin-top: 0;
 }
 
 h1 small {
@@ -30,9 +31,19 @@ h1 small {
     font-size: 12pt;
 }
 
-hr {
-    background-color: #ccc;
-    border: none;
-    height: 1px;
-    margin: 16px 0;
+.group {
+    background-color: #f7f7f7;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    padding: 16px;
+}
+
+.group .title {
+    font-size: 16pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.group .status {
+    margin-bottom: 16px;
 }

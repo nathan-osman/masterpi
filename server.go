@@ -1,8 +1,11 @@
 package masterpi
 
 import (
+	"encoding/json"
+	"errors"
 	"net"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -15,9 +18,41 @@ type Server struct {
 	stoppedCh chan bool
 }
 
-func (s *Server) apiLampToggle(w http.ResponseWriter, r *http.Request) {
-	s.relay.Toggle()
-	http.Redirect(w, r, "/", http.StatusFound)
+func (s *Server) writeResponse(w http.ResponseWriter, contentType string, content []byte) {
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
+	w.WriteHeader(http.StatusOK)
+	w.Write(content)
+}
+
+type apiLampStateParams struct {
+	Value bool `json:"value"`
+}
+
+func (s *Server) apiLampState(w http.ResponseWriter, r *http.Request) {
+	err := func() error {
+		switch r.Method {
+		case http.MethodGet:
+			b, err := json.Marshal(apiLampStateParams{Value: s.relay.IsOn()})
+			if err != nil {
+				return err
+			}
+			s.writeResponse(w, "application/json", b)
+		case http.MethodPost:
+			var v apiLampStateParams
+			if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+				return err
+			}
+			s.relay.SetOn(v.Value)
+			s.writeResponse(w, "application/json", []byte("{}"))
+		default:
+			return errors.New("invalid method")
+		}
+		return nil
+	}()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
 }
 
 func NewServer(r *Relay) (*Server, error) {
@@ -38,7 +73,7 @@ func NewServer(r *Relay) (*Server, error) {
 		}
 		handler = http.FileServer(HTTP)
 	)
-	router.HandleFunc("/api/lamp/toggle", s.apiLampToggle)
+	router.HandleFunc("/api/lamp/state", s.apiLampState)
 	router.PathPrefix("/").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			r.URL.Path = "/www" + r.URL.Path
