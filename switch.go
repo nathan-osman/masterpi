@@ -19,7 +19,7 @@ func (s *Switch) run() {
 	defer close(s.stoppedChan)
 	defer s.log.Info("switch shut down")
 	s.log.Info("switch started")
-	t := time.NewTicker(250 * time.Millisecond)
+	t := time.NewTicker(100 * time.Millisecond)
 	defer t.Stop()
 	var oldVal rpi.Value
 	for {
