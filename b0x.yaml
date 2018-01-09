@@ -5,3 +5,4 @@ compression:
 custom:
   - files:
     - fonts
+    - www

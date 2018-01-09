@@ -3,7 +3,6 @@ package masterpi
 import (
 	"net"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
@@ -16,36 +15,13 @@ type Server struct {
 	stoppedCh chan bool
 }
 
-func (s *Server) writeResponse(w http.ResponseWriter, contentType string, content []byte) {
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
-	w.WriteHeader(http.StatusOK)
-	w.Write(content)
-}
-
-func (s *Server) index(w http.ResponseWriter, r *http.Request) {
-	s.writeResponse(w, "text/html", []byte(`<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    </head>
-    <body>
-        <form method="post" action="/api/lamp/toggle">
-            <button type="submit">Toggle Lamp</button>
-        </form>
-    </body>
-</html>
-`))
-}
-
 func (s *Server) apiLampToggle(w http.ResponseWriter, r *http.Request) {
 	s.relay.Toggle()
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func NewServer(r *Relay) (*Server, error) {
-	l, err := net.Listen("tcp", ":80")
+	l, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		return nil, err
 	}
@@ -60,9 +36,15 @@ func NewServer(r *Relay) (*Server, error) {
 		server = http.Server{
 			Handler: router,
 		}
+		handler = http.FileServer(HTTP)
 	)
-	router.HandleFunc("/", s.index)
 	router.HandleFunc("/api/lamp/toggle", s.apiLampToggle)
+	router.PathPrefix("/").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			r.URL.Path = "/www" + r.URL.Path
+			handler.ServeHTTP(w, r)
+		},
+	)
 	go func() {
 		defer close(s.stoppedCh)
 		defer s.log.Info("server shut down")

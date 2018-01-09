@@ -9,7 +9,7 @@ GID = $(shell id -g)
 SOURCES = $(shell find -type f -name '*.go' ! -path './cache/*')
 
 # Find all resources
-RESOURCES = $(shell find fonts)
+RESOURCES = $(shell find fonts www)
 
 all: dist/${CMD}
 

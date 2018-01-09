@@ -1,0 +1,38 @@
+/**
+ * Masterpi CSS
+ * Copyright 2018 - Nathan Osman
+ */
+
+body {
+    font-family: sans-serif;
+}
+
+button {
+    background-color: #eee;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    cursor: pointer;
+    padding: 8px 16px;
+}
+
+button:hover {
+    background-color: #fff;
+}
+
+h1 {
+    font-size: 32pt;
+    font-weight: normal;
+    margin: 0;
+}
+
+h1 small {
+    display: block;
+    font-size: 12pt;
+}
+
+hr {
+    background-color: #ccc;
+    border: none;
+    height: 1px;
+    margin: 16px 0;
+}
