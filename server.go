@@ -43,6 +43,7 @@ func (s *Server) apiLampState(w http.ResponseWriter, r *http.Request) {
 			if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
 				return err
 			}
+			s.log.Infof("lamp state: %v", v.Value)
 			s.relay.SetOn(v.Value)
 			s.writeResponse(w, "application/json", []byte("{}"))
 		default:
