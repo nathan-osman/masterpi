@@ -8,12 +8,13 @@ import (
 type Updater struct {
 	display     *Display
 	monitor     *Monitor
+	location    *time.Location
 	stopChan    chan bool
 	stoppedChan chan bool
 }
 
 func (u *Updater) refresh(t time.Time) {
-	t = t.Local()
+	t = t.In(u.location)
 	u.display.Clear()
 	u.display.DrawText(
 		fmt.Sprintf("%02d:%02d:%02d", t.Hour(), t.Minute(), t.Second()),
@@ -58,9 +59,14 @@ func NewUpdater(m *Monitor) (*Updater, error) {
 	if err != nil {
 		return nil, err
 	}
+	l, err := time.LoadLocation("America/Vancouver")
+	if err != nil {
+		return nil, err
+	}
 	u := &Updater{
 		display:     d,
 		monitor:     m,
+		location:    l,
 		stopChan:    make(chan bool),
 		stoppedChan: make(chan bool),
 	}
