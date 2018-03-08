@@ -13,6 +13,7 @@ import (
 
 type Server struct {
 	relay     *Relay
+	timer     *Timer
 	listener  net.Listener
 	log       *logrus.Entry
 	stoppedCh chan bool
@@ -56,7 +57,42 @@ func (s *Server) apiLampState(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func NewServer(r *Relay) (*Server, error) {
+type apiTimerValuesParams struct {
+	TurnOn  []string `json:"turn-on"`
+	TurnOff []string `json:"turn-off"`
+}
+
+func (s *Server) apiTimerValues(w http.ResponseWriter, r *http.Request) {
+	err := func() error {
+		switch r.Method {
+		case http.MethodGet:
+			turnOnEntries, turnOffEntries := s.timer.GetTimes()
+			b, err := json.Marshal(apiTimerValuesParams{
+				TurnOn:  turnOnEntries,
+				TurnOff: turnOffEntries,
+			})
+			if err != nil {
+				return err
+			}
+			s.writeResponse(w, "application/json", b)
+		case http.MethodPost:
+			var v apiTimerValuesParams
+			if err := json.NewDecoder(r.Body).Decode(&v); err != nil {
+				return err
+			}
+			s.timer.SetTimes(v.TurnOn, v.TurnOff)
+			s.writeResponse(w, "application/json", []byte("{}"))
+		default:
+			return errors.New("invalid method")
+		}
+		return nil
+	}()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+	}
+}
+
+func NewServer(r *Relay, t *Timer) (*Server, error) {
 	l, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		return nil, err
@@ -65,6 +101,7 @@ func NewServer(r *Relay) (*Server, error) {
 		router = mux.NewRouter()
 		s      = &Server{
 			relay:     r,
+			timer:     t,
 			listener:  l,
 			log:       logrus.WithField("context", "server"),
 			stoppedCh: make(chan bool),
@@ -75,6 +112,7 @@ func NewServer(r *Relay) (*Server, error) {
 		handler = http.FileServer(HTTP)
 	)
 	router.HandleFunc("/api/lamp/state", s.apiLampState)
+	router.HandleFunc("/api/timer/values", s.apiTimerValues)
 	router.PathPrefix("/").HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			r.URL.Path = "/www" + r.URL.Path
