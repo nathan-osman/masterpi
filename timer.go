@@ -22,16 +22,16 @@ type Timer struct {
 }
 
 func (t *Timer) parseTime(timeStr string, now time.Time) (time.Time, error) {
-	var parsedTime time.Time
 	v, err := time.Parse("15:04", timeStr)
 	if err != nil {
 		return time.Time{}, err
 	}
+	curDay := now
 	for {
-		parsedTime = time.Date(
-			now.Year(),
-			now.Month(),
-			now.Day(),
+		parsedTime := time.Date(
+			curDay.Year(),
+			curDay.Month(),
+			curDay.Day(),
 			v.Hour(),
 			v.Minute(),
 			0,
@@ -39,7 +39,7 @@ func (t *Timer) parseTime(timeStr string, now time.Time) (time.Time, error) {
 			t.location,
 		)
 		if parsedTime.Before(now) {
-			now = now.Add(24 * time.Hour)
+			curDay = curDay.Add(24 * time.Hour)
 		} else {
 			return parsedTime, nil
 		}
