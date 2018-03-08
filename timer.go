@@ -67,9 +67,19 @@ func (t *Timer) run() {
 	t.log.Info("timer started")
 	for {
 		var (
+			timeOnEntries  []string
+			timeOffEntries []string
+		)
+		func() {
+			t.mutex.Lock()
+			defer t.mutex.Unlock()
+			timeOnEntries = t.timeOnEntries
+			timeOffEntries = t.timeOffEntries
+		}()
+		var (
 			now         = time.Now()
-			nextTimeOn  = t.findSoonest(t.timeOnEntries, now)
-			nextTimeOff = t.findSoonest(t.timeOffEntries, now)
+			nextTimeOn  = t.findSoonest(timeOnEntries, now)
+			nextTimeOff = t.findSoonest(timeOffEntries, now)
 			turnOnChan  <-chan time.Time
 			turnOffChan <-chan time.Time
 		)
