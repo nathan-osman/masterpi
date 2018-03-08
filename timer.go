@@ -39,7 +39,7 @@ func (t *Timer) parseTime(timeStr string, now time.Time) (time.Time, error) {
 			t.location,
 		)
 		if parsedTime.Before(now) {
-			now.Add(24 * time.Hour)
+			now = now.Add(24 * time.Hour)
 		} else {
 			return parsedTime, nil
 		}
@@ -47,18 +47,18 @@ func (t *Timer) parseTime(timeStr string, now time.Time) (time.Time, error) {
 }
 
 func (t *Timer) findSoonest(timeStrs []string, now time.Time) time.Time {
-	var nextTimeOn time.Time
-	for _, v := range timeStrs {
-		v, err := t.parseTime(v, now)
+	var soonestTime time.Time
+	for _, timeStr := range timeStrs {
+		v, err := t.parseTime(timeStr, now)
 		if err != nil {
 			t.log.Error(err.Error())
 			continue
 		}
-		if v.Before(nextTimeOn) {
-			nextTimeOn = v
+		if soonestTime.IsZero() || v.Before(soonestTime) {
+			soonestTime = v
 		}
 	}
-	return nextTimeOn
+	return soonestTime
 }
 
 func (t *Timer) run() {
@@ -67,6 +67,7 @@ func (t *Timer) run() {
 	t.log.Info("timer started")
 	for {
 		var (
+			now            = time.Now()
 			timeOnEntries  []string
 			timeOffEntries []string
 		)
@@ -77,7 +78,6 @@ func (t *Timer) run() {
 			timeOffEntries = t.timeOffEntries
 		}()
 		var (
-			now         = time.Now()
 			nextTimeOn  = t.findSoonest(timeOnEntries, now)
 			nextTimeOff = t.findSoonest(timeOffEntries, now)
 			turnOnChan  <-chan time.Time
