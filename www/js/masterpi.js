@@ -5,11 +5,21 @@
 
 $(function() {
 
+    function toList(value) {
+        return $.map(value.split(','), function(v) {
+            return v.trim();
+        });
+    }
+
     // Find the page components
-    var $group = $('.group.lamp'),
-        $statusVal = $group.find('.status .value'),
-        $on = $group.find('button.on'),
-        $off = $group.find('button.off');
+    var $lampGroup = $('.group.lamp'),
+        $lampStatus = $lampGroup.find('.status .value'),
+        $lampOn = $lampGroup.find('button.on'),
+        $lampOff = $lampGroup.find('button.off'),
+        $timerGroup = $('.group.timer'),
+        $timerOn = $timerGroup.find('.turn-on'),
+        $timerOff = $timerGroup.find('.turn-off'),
+        $timerSave = $('.timer button');
 
     /**
      * Load the current state of the lamp
@@ -17,7 +27,7 @@ $(function() {
     function loadState() {
         return $.get('/api/lamp/state')
         .done(function(d) {
-            $statusVal.text(d.value ? "on" : "off");
+            $lampStatus.text(d.value ? "on" : "off");
         });
     }
 
@@ -36,23 +46,55 @@ $(function() {
     }
 
     /**
+     * Load the values for the timers
+     */
+    function loadTimerValues() {
+        return $.get('/api/timer/values')
+        .done(function(d) {
+            $timerOn.val(d['turn-on'].join(', '));
+            $timerOff.val(d['turn-off'].join(', '));
+        });
+    }
+
+    /**
+     * Save the timer values
+     */
+    function saveTimerValues() {
+        return $.ajax({
+            type: 'POST',
+            url: '/api/timer/values',
+            data: JSON.stringify({
+                'turn-on': toList($timerOn.val()),
+                'turn-off': toList($timerOff.val())
+            }),
+            contentType: 'application/json'
+        });
+    }
+
+    /**
      * Handle an error from an AJAX request
      */
     function handleError(promise) {
         promise.fail(function() {
-            $statusVal.text('error');
+            $lampStatus.text('error');
         });
     }
 
     // Set the click handlers for the "on" and "off" buttons
-    $on.click(function() {
+    $lampOn.click(function() {
         handleError(setState(true).then(loadState));
     });
-    $off.click(function() {
+    $lampOff.click(function() {
         handleError(setState(false).then(loadState));
     });
 
-    // Load the initial value
+    // Set the click handler for the timer
+    $timerSave.click(function() {
+        handleError(saveTimerValues());
+    });
+
+    // Load the initial values
     handleError(loadState());
+    handleError(loadTimerValues());
 
 });

@@ -3,6 +3,10 @@
  * Copyright 2018 - Nathan Osman
  */
 
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: sans-serif;
     margin: 16px;
@@ -31,10 +35,25 @@ h1 small {
     font-size: 12pt;
 }
 
+label {
+    display: block;
+    margin: 8px 0;
+}
+
+label input {
+    border: 1px solid #aaa;
+    border-radius: 3px;
+    display: block;
+    margin: 8px 0;
+    padding: 8px;
+    width: 100%;
+}
+
 .group {
     background-color: #f7f7f7;
     border: 1px solid #ccc;
     border-radius: 3px;
+    margin: 8px 0;
     padding: 16px;
 }
 
