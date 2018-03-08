@@ -63,6 +63,8 @@ func (t *Timer) findSoonest(timeStrs []string, now time.Time) time.Time {
 
 func (t *Timer) run() {
 	defer close(t.stoppedChan)
+	defer t.log.Info("timer shut down")
+	t.log.Info("timer started")
 	for {
 		var (
 			now         = time.Now()
@@ -73,18 +75,22 @@ func (t *Timer) run() {
 		)
 		if !nextTimeOn.IsZero() {
 			if nextTimeOn.After(now) {
+				t.log.Printf("next on at %s", nextTimeOn.String())
 				turnOnChan = time.After(nextTimeOn.Sub(now))
 			}
 		}
 		if !nextTimeOff.IsZero() {
 			if nextTimeOff.After(now) {
+				t.log.Printf("next off at %s", nextTimeOff.String())
 				turnOffChan = time.After(nextTimeOff.Sub(now))
 			}
 		}
 		select {
 		case <-turnOnChan:
+			t.log.Print("turning on lamp")
 			t.relay.SetOn(true)
 		case <-turnOffChan:
+			t.log.Print("turning off lamp")
 			t.relay.SetOn(false)
 		case <-t.triggerChan:
 		case <-t.stopChan:
