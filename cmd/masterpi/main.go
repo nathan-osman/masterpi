@@ -75,7 +75,10 @@ func main() {
 		defer s.Close()
 
 		// Create the light timer
-		t := masterpi.NewTimer(r)
+		t, err := masterpi.NewTimer(r)
+		if err != nil {
+			return err
+		}
 		defer t.Close()
 
 		// Create the HTTP server
