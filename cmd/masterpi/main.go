@@ -79,7 +79,7 @@ func main() {
 		defer t.Close()
 
 		// Create the HTTP server
-		h, err := masterpi.NewServer(r)
+		h, err := masterpi.NewServer(r, t)
 		if err != nil {
 			return err
 		}
