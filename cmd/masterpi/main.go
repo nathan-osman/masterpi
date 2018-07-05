@@ -31,6 +31,12 @@ func main() {
 			EnvVar: "INFLUXDB_PASSWORD",
 			Usage:  "password for connecting to InfluxDB",
 		},
+		cli.StringFlag{
+			Name:   "storage-dir",
+			Value:  "/data",
+			EnvVar: "STORAGE_DIR",
+			Usage:  "directory for internal storage",
+		},
 	}
 	app.Action = func(c *cli.Context) error {
 
@@ -75,7 +81,10 @@ func main() {
 		defer s.Close()
 
 		// Create the light timer
-		t, err := masterpi.NewTimer(r)
+		t, err := masterpi.NewTimer(
+			c.String("storage-dir"),
+			r,
+		)
 		if err != nil {
 			return err
 		}

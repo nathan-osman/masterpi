@@ -1,24 +1,56 @@
 package masterpi
 
 import (
+	"encoding/json"
+	"os"
+	"path"
 	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
-// TODO: permanent storage for this information
+type timerConfig struct {
+	fileName       string
+	TimeOnEntries  []string `json:"time_on_entries"`
+	TimeOffEntries []string `json:"time_off_entries"`
+}
+
+func (t *timerConfig) Load() error {
+	f, err := os.Open(t.fileName)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if err == nil {
+		defer f.Close()
+		if err := json.NewDecoder(f).Decode(t); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (t *timerConfig) Save() error {
+	f, err := os.Create(t.filename)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if err := json.NewEncoder(f).Encode(t); err != nil {
+		return err
+	}
+	return nil
+}
 
 type Timer struct {
-	mutex          sync.Mutex
-	relay          *Relay
-	location       *time.Location
-	timeOnEntries  []string
-	timeOffEntries []string
-	log            *logrus.Entry
-	triggerChan    chan bool
-	stopChan       chan bool
-	stoppedChan    chan bool
+	mutex       sync.Mutex
+	relay       *Relay
+	location    *time.Location
+	config      *timerConfig
+	log         *logrus.Entry
+	triggerChan chan bool
+	stopChan    chan bool
+	stoppedChan chan bool
 }
 
 func (t *Timer) parseTime(timeStr string, now time.Time) (time.Time, error) {
@@ -100,20 +132,25 @@ func (t *Timer) run() {
 	}
 }
 
-func NewTimer(r *Relay) (*Timer, error) {
+func NewTimer(storageDir string, r *Relay) (*Timer, error) {
 	l, err := time.LoadLocation("America/Vancouver")
 	if err != nil {
 		return nil, err
 	}
+	config := &timerConfig{
+		fileName: path.Join(storageDir, "config.json"),
+	}
+	if err := config.Load(); err != nil {
+		return nil, err
+	}
 	t := &Timer{
-		relay:          r,
-		location:       l,
-		timeOnEntries:  []string{},
-		timeOffEntries: []string{},
-		log:            logrus.WithField("context", "timer"),
-		triggerChan:    make(chan bool, 1),
-		stopChan:       make(chan bool),
-		stoppedChan:    make(chan bool),
+		relay:       r,
+		location:    l,
+		config:      config,
+		log:         logrus.WithField("context", "timer"),
+		triggerChan: make(chan bool, 1),
+		stopChan:    make(chan bool),
+		stoppedChan: make(chan bool),
 	}
 	go t.run()
 	return t, nil
@@ -130,6 +167,9 @@ func (t *Timer) SetTimes(timeOnEntries, timeOffEntries []string) {
 	defer t.mutex.Unlock()
 	t.timeOnEntries = timeOnEntries
 	t.timeOffEntries = timeOffEntries
+	if err := t.config.Save(); err != nil {
+		t.log.Error(err.Error())
+	}
 	select {
 	case t.triggerChan <- true:
 	default:
