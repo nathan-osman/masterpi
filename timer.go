@@ -31,7 +31,7 @@ func (t *timerConfig) Load() error {
 }
 
 func (t *timerConfig) Save() error {
-	f, err := os.Create(t.filename)
+	f, err := os.Create(t.fileName)
 	if err != nil {
 		return err
 	}
@@ -159,14 +159,14 @@ func NewTimer(storageDir string, r *Relay) (*Timer, error) {
 func (t *Timer) GetTimes() ([]string, []string) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
-	return t.timeOnEntries, t.timeOffEntries
+	return t.config.TimeOnEntries, t.config.TimeOffEntries
 }
 
 func (t *Timer) SetTimes(timeOnEntries, timeOffEntries []string) {
 	t.mutex.Lock()
 	defer t.mutex.Unlock()
-	t.timeOnEntries = timeOnEntries
-	t.timeOffEntries = timeOffEntries
+	t.config.TimeOnEntries = timeOnEntries
+	t.config.TimeOffEntries = timeOffEntries
 	if err := t.config.Save(); err != nil {
 		t.log.Error(err.Error())
 	}
