@@ -32,7 +32,6 @@ func (s *Sensor) run() {
 			if v == rpi.HIGH {
 				s.relay.SetOn(true)
 			}
-			oldVal = v
 		case <-s.stopChan:
 			return
 		}
