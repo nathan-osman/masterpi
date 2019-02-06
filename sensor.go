@@ -21,7 +21,6 @@ func (s *Sensor) run() {
 	s.log.Info("sensor started")
 	t := time.NewTicker(100 * time.Millisecond)
 	defer t.Stop()
-	var oldVal rpi.Value
 	for {
 		select {
 		case <-t.C:
