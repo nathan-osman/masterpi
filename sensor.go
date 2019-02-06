@@ -53,7 +53,7 @@ func NewSensor(r *Relay) (*Sensor, error) {
 		stoppedChan: make(chan bool),
 	}
 	go s.run()
-	return s
+	return s, nil
 }
 
 func (s *Sensor) Close() {
