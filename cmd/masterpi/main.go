@@ -85,7 +85,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		defer se.close()
+		defer se.Close()
 
 		// Create the light timer
 		t, err := masterpi.NewTimer(
