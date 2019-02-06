@@ -80,6 +80,13 @@ func main() {
 		}
 		defer s.Close()
 
+		// Create the sensor monitor
+		se, err := masterpi.NewSensor(r)
+		if err != nil {
+			return err
+		}
+		defer se.close()
+
 		// Create the light timer
 		t, err := masterpi.NewTimer(
 			c.String("storage-dir"),
