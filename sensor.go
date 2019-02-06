@@ -1,7 +1,10 @@
 package masterpi
 
 import (
+	"time"
+
 	"github.com/nathan-osman/go-rpigpio"
+	"github.com/sirupsen/logrus"
 )
 
 type Sensor struct {
